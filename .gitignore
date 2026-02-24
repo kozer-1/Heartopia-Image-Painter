@@ -2,3 +2,4 @@
 *.af~lock~
 config.json
 *.af~lock~
+/videos
