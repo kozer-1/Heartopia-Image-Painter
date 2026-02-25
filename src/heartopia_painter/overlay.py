@@ -6,6 +6,13 @@ from typing import List, Optional, Tuple
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
+from .hidpi import (
+    logical_point_to_native,
+    logical_rect_to_native,
+    native_point_to_logical,
+    native_rect_tuple_to_logical,
+)
+
 
 @dataclass
 class RectResult:
@@ -116,12 +123,13 @@ class RectSelectOverlay(QtWidgets.QWidget):
                 self.hide()
                 # Convert back to global screen coordinates for downstream clicking.
                 global_rect = rect.translated(self._global_origin)
+                native_rect = logical_rect_to_native(global_rect)
                 self.rectSelected.emit(
                     RectResult(
-                        x=global_rect.x(),
-                        y=global_rect.y(),
-                        w=global_rect.width(),
-                        h=global_rect.height(),
+                        x=native_rect.x(),
+                        y=native_rect.y(),
+                        w=native_rect.width(),
+                        h=native_rect.height(),
                     )
                 )
             else:
@@ -292,8 +300,9 @@ class PointSelectOverlay(QtWidgets.QWidget):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
             local = event.position().toPoint()
             global_pt = local + self._global_origin
+            native_pt = logical_point_to_native(global_pt)
             self.hide()
-            self.pointSelected.emit(PointResult(x=global_pt.x(), y=global_pt.y()))
+            self.pointSelected.emit(PointResult(x=native_pt.x(), y=native_pt.y()))
             return
         if event.button() == QtCore.Qt.MouseButton.RightButton:
             self.hide()
@@ -414,16 +423,18 @@ class MarkersOverlay(QtWidgets.QWidget):
 
         # Markers
         radius = 12
+        origin_f = QtCore.QPointF(self._global_origin)
         for m in self._markers:
             gx, gy = int(m.pos[0]), int(m.pos[1])
-            local = QtCore.QPoint(gx, gy) - self._global_origin
+            logical_pt = native_point_to_logical((gx, gy))
+            local = logical_pt - origin_f
 
             col = QtGui.QColor(int(m.color[0]), int(m.color[1]), int(m.color[2]), 255)
             pen = QtGui.QPen(col)
             pen.setWidth(3)
             painter.setPen(pen)
             painter.setBrush(QtGui.QColor(col.red(), col.green(), col.blue(), 30))
-            painter.drawEllipse(local, radius, radius)
+            painter.drawEllipse(QtCore.QPointF(local), radius, radius)
 
             # Crosshair
             painter.drawLine(local.x() - 18, local.y(), local.x() + 18, local.y())
@@ -435,7 +446,7 @@ class MarkersOverlay(QtWidgets.QWidget):
             tw = fm.horizontalAdvance(label)
             th = fm.height()
             pad = 6
-            box = QtCore.QRect(local.x() + 18, local.y() - th, tw + pad * 2, th + pad)
+            box = QtCore.QRectF(local.x() + 18, local.y() - th, tw + pad * 2, th + pad)
             painter.setPen(QtCore.Qt.PenStyle.NoPen)
             painter.setBrush(QtGui.QColor(0, 0, 0, 175))
             painter.drawRoundedRect(box, 6, 6)
@@ -463,7 +474,7 @@ class StatusOverlay(QtWidgets.QWidget):
 
         self._title = str(title)
         self._status: str = "Idle"
-        self._anchor_rect: Optional[QtCore.QRect] = None
+        self._anchor_rect: Optional[QtCore.QRectF] = None
 
         # Replica canvas state (grid coords)
         self._grid_w: int = 0
@@ -566,7 +577,7 @@ class StatusOverlay(QtWidgets.QWidget):
             self._anchor_rect = None
             return
         l, t, r, b = (int(rect[0]), int(rect[1]), int(rect[2]), int(rect[3]))
-        self._anchor_rect = QtCore.QRect(l, t, max(0, r - l), max(0, b - t))
+        self._anchor_rect = native_rect_tuple_to_logical((l, t, r, b))
         self._reposition_to_anchor()
 
     def _reposition_to_anchor(self) -> None:
@@ -582,7 +593,7 @@ class StatusOverlay(QtWidgets.QWidget):
         # Clamp vertically so we never go above the window.
         y = max(ar.top() + margin, y)
 
-        self.move(int(x), int(y))
+        self.move(int(round(x)), int(round(y)))
 
     def _apply_platform_clickthrough(self) -> None:
         if os.name != "nt":
