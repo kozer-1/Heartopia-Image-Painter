@@ -25,6 +25,9 @@ This app uses on-screen overlays for picking points/areas and uses mouse automat
 
 ## Install (Windows / PowerShell)
 
+Video Tutorial:
+https://www.youtube.com/watch?v=WgcFCH_MMPs
+
 From the repo folder:
 
 1. Create a virtual environment:
