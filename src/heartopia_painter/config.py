@@ -37,6 +37,9 @@ class AppConfig:
     # For 16:9 preset
     sixteen_nine_precision: str = "Small"
 
+    # For 9:16 preset
+    nine_sixteen_precision: str = "Small"
+
     # Convenience: restore last session state
     last_image_path: Optional[str] = None
     last_canvas_rect: Optional[Rect] = None
@@ -166,6 +169,7 @@ class AppConfig:
 
         cfg.one_to_one_precision = str(data.get("one_to_one_precision", cfg.one_to_one_precision))
         cfg.sixteen_nine_precision = str(data.get("sixteen_nine_precision", cfg.sixteen_nine_precision))
+        cfg.nine_sixteen_precision = str(data.get("nine_sixteen_precision", cfg.nine_sixteen_precision))
 
         cfg.last_image_path = data.get("last_image_path")
         if cfg.last_image_path is not None:

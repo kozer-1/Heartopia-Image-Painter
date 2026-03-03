@@ -34,7 +34,6 @@ SIXTEEN_NINE_PRECISIONS: dict[str, Tuple[int, int]] = {
     "Super Large": (150, 84),
 }
 
-# Portrait presets (9:16) — widths x heights provided by user
 NINE_SIXTEEN_PRECISIONS: dict[str, Tuple[int, int]] = {
     "Small": (18, 30),
     "Medium": (28, 50),
@@ -51,7 +50,7 @@ TSHIRT_PARTS: dict[str, Tuple[int, int]] = {
 
 
 def selection_key(preset: str, variant: Optional[str]) -> str:
-    if preset in {ONE_TO_ONE_PRESET_NAME, SIXTEEN_NINE_PRESET_NAME}:
+    if preset in {ONE_TO_ONE_PRESET_NAME, SIXTEEN_NINE_PRESET_NAME, NINE_SIXTEEN_PRESET_NAME}:
         precision = variant or "Small"
         return f"{preset}::{precision}"
     if preset == TSHIRT_PRESET_NAME:
@@ -581,6 +580,10 @@ class MainWindow(QtWidgets.QMainWindow):
             prec = getattr(self._cfg, "sixteen_nine_precision", None)
             if prec and self.cbo_precision.findText(prec) >= 0:
                 self.cbo_precision.setCurrentText(prec)
+        elif self._cfg.canvas_preset == NINE_SIXTEEN_PRESET_NAME:
+            prec = getattr(self._cfg, "nine_sixteen_precision", None)
+            if prec and self.cbo_precision.findText(prec) >= 0:
+                self.cbo_precision.setCurrentText(prec)
 
         # Restore T-Shirt part
         if self._cfg.tshirt_part and self.cbo_part.findText(self._cfg.tshirt_part) >= 0:
@@ -730,6 +733,8 @@ class MainWindow(QtWidgets.QMainWindow):
             part_txt = f" — {self.cbo_precision.currentText()}"
         elif preset == SIXTEEN_NINE_PRESET_NAME:
             part_txt = f" — {self.cbo_precision.currentText()}"
+        elif preset == NINE_SIXTEEN_PRESET_NAME:
+            part_txt = f" — {self.cbo_precision.currentText()}"
         elif preset == TSHIRT_PRESET_NAME:
             part_txt = f" — {self.cbo_part.currentText()}"
 
@@ -794,6 +799,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if preset == SIXTEEN_NINE_PRESET_NAME:
             precision = self.cbo_precision.currentText() or getattr(self._cfg, "sixteen_nine_precision", "Small") or "Small"
             return SIXTEEN_NINE_PRECISIONS.get(precision, SIXTEEN_NINE_PRECISIONS["Small"])
+        if preset == NINE_SIXTEEN_PRESET_NAME:
+            precision = self.cbo_precision.currentText() or getattr(self._cfg, "nine_sixteen_precision", "Small") or "Small"
+            return NINE_SIXTEEN_PRECISIONS.get(precision, NINE_SIXTEEN_PRECISIONS["Small"])
         if preset == TSHIRT_PRESET_NAME:
             part = self.cbo_part.currentText() or self._cfg.tshirt_part or "Front"
             return TSHIRT_PARTS.get(part, TSHIRT_PARTS["Front"])
@@ -807,6 +815,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if preset == SIXTEEN_NINE_PRESET_NAME:
             precision = self.cbo_precision.currentText() or getattr(self._cfg, "sixteen_nine_precision", "Small") or "Small"
             return selection_key(preset, precision)
+        if preset == NINE_SIXTEEN_PRESET_NAME:
+            precision = self.cbo_precision.currentText() or getattr(self._cfg, "nine_sixteen_precision", "Small") or "Small"
+            return selection_key(preset, precision)
         if preset == TSHIRT_PRESET_NAME:
             part = self.cbo_part.currentText() if preset == TSHIRT_PRESET_NAME else None
             return selection_key(preset, part)
@@ -814,7 +825,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _update_variant_ui_visibility(self) -> None:
         preset = self.cbo_preset.currentText()
-        is_precision = preset in {ONE_TO_ONE_PRESET_NAME, SIXTEEN_NINE_PRESET_NAME}
+        is_precision = preset in {ONE_TO_ONE_PRESET_NAME, SIXTEEN_NINE_PRESET_NAME, NINE_SIXTEEN_PRESET_NAME}
         is_tshirt = preset == TSHIRT_PRESET_NAME
 
         self.lbl_precision.setVisible(is_precision)
@@ -879,6 +890,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self._cfg.canvas_preset = self.cbo_preset.currentText()
         if self.cbo_preset.currentText() == ONE_TO_ONE_PRESET_NAME:
             self._cfg.one_to_one_precision = self.cbo_precision.currentText() or self._cfg.one_to_one_precision
+        if self.cbo_preset.currentText() == SIXTEEN_NINE_PRESET_NAME:
+            self._cfg.sixteen_nine_precision = self.cbo_precision.currentText() or getattr(
+                self._cfg, "sixteen_nine_precision", "Small"
+            )
+        if self.cbo_preset.currentText() == NINE_SIXTEEN_PRESET_NAME:
+            self._cfg.nine_sixteen_precision = self.cbo_precision.currentText() or getattr(
+                self._cfg, "nine_sixteen_precision", "Small"
+            )
         if self.cbo_preset.currentText() == TSHIRT_PRESET_NAME:
             self._cfg.tshirt_part = self.cbo_part.currentText() or self._cfg.tshirt_part
         self._save_cfg()
@@ -956,6 +975,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self._cfg.sixteen_nine_precision = self.cbo_precision.currentText() or getattr(
                 self._cfg, "sixteen_nine_precision", "Small"
             )
+        if self.cbo_preset.currentText() == NINE_SIXTEEN_PRESET_NAME:
+            self._cfg.nine_sixteen_precision = self.cbo_precision.currentText() or getattr(
+                self._cfg, "nine_sixteen_precision", "Small"
+            )
         if self.cbo_preset.currentText() == TSHIRT_PRESET_NAME:
             self._cfg.tshirt_part = self.cbo_part.currentText() or self._cfg.tshirt_part
         self._save_cfg()
@@ -968,6 +991,10 @@ class MainWindow(QtWidgets.QMainWindow):
         elif preset == SIXTEEN_NINE_PRESET_NAME:
             self._cfg.sixteen_nine_precision = self.cbo_precision.currentText() or getattr(
                 self._cfg, "sixteen_nine_precision", "Small"
+            )
+        elif preset == NINE_SIXTEEN_PRESET_NAME:
+            self._cfg.nine_sixteen_precision = self.cbo_precision.currentText() or getattr(
+                self._cfg, "nine_sixteen_precision", "Small"
             )
         else:
             return

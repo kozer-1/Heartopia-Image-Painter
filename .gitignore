@@ -3,3 +3,4 @@
 config.json
 *.af~lock~
 /videos
+/src/heartopia_painter/__pycache__
