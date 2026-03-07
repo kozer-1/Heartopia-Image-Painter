@@ -40,6 +40,12 @@ class AppConfig:
     # For 9:16 preset
     nine_sixteen_precision: str = "Small"
 
+    # For 4:3 preset
+    four_three_precision: str = "Small"
+
+    # For 3:4 preset
+    three_four_precision: str = "Small"
+
     # Convenience: restore last session state
     last_image_path: Optional[str] = None
     last_canvas_rect: Optional[Rect] = None
@@ -170,6 +176,8 @@ class AppConfig:
         cfg.one_to_one_precision = str(data.get("one_to_one_precision", cfg.one_to_one_precision))
         cfg.sixteen_nine_precision = str(data.get("sixteen_nine_precision", cfg.sixteen_nine_precision))
         cfg.nine_sixteen_precision = str(data.get("nine_sixteen_precision", cfg.nine_sixteen_precision))
+        cfg.four_three_precision = str(data.get("four_three_precision", cfg.four_three_precision))
+        cfg.three_four_precision = str(data.get("three_four_precision", cfg.three_four_precision))
 
         cfg.last_image_path = data.get("last_image_path")
         if cfg.last_image_path is not None:
